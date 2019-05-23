@@ -137,7 +137,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 		output = output + line
 
-		if oldLine != line  {
+		if oldLine != line {
 			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
 		}
 	}
@@ -183,7 +183,7 @@ func processFile(filename string) error {
 	if len(lines) > 0 {
 		fmt.Printf("%s\n", filename)
 		for _, l := range lines {
-			fmt.Printf("%s\n", l)
+			fmt.Printf("%s", l)
 		}
 	}
 
@@ -314,6 +314,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.1", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.2", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
