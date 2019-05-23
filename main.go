@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -25,6 +26,7 @@ var (
 	replaceUpper *bool
 	replaceLower *bool
 	backup       *bool
+	simulate     *bool
 
 	rootPath string
 )
@@ -35,10 +37,11 @@ func init() {
 	filemask = flag.String("f", "", "input file or STDIN")
 	ignoreCase = flag.Bool("i", false, "ignore case")
 	recursive = flag.Bool("R", false, "recursive directory search")
-	replaceUpper = flag.Bool("tu", false, "replace to replaceUpper")
-	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
-	replaceCase = flag.Bool("tc", false, "replace case sensitive")
+	replaceUpper = flag.Bool("ru", false, "replace to replaceUpper")
+	replaceLower = flag.Bool("rl", false, "replace to replaceLower")
+	replaceCase = flag.Bool("rc", false, "replace case sensitive like found text")
 	backup = flag.Bool("b", true, "create backup files")
+	simulate = flag.Bool("S", false, "simulate replace")
 }
 
 func prepare() error {
@@ -47,68 +50,99 @@ func prepare() error {
 	return nil
 }
 
-func searchAndReplace(str string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, upper bool, lower bool) (string, error) {
-	_str := str
+func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool) (string, []string, error) {
+	lines := []string{}
+	output := ""
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner.Split(common.ScanLinesWithLF)
 
-	if ignoreCase {
-		_str = strings.ToUpper(_str)
-		searchStr = strings.ToUpper(searchStr)
-	}
+	c := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		oldLine := line
 
-	for {
-		p := strings.Index(_str, searchStr)
+		c++
 
-		if p == -1 {
-			break
-		}
+		nextP := 0
+		p := 0
 
-		txt := str[p : p+len(searchStr)]
-		isLetter := false
-		firstUpper := false
-		secondUpper := false
-
-		if replaceCase {
-			r, err := common.GetRune(txt, 0)
-			if err != nil {
-				return "", err
+		for {
+			if ignoreCase {
+				p = strings.Index(strings.ToUpper(line[nextP:]), strings.ToUpper(searchStr))
+			} else {
+				p = strings.Index(line[nextP:], searchStr)
 			}
-			firstUpper = unicode.IsUpper(r)
-			isLetter = unicode.IsLetter(r)
 
-			if len(txt) > 1 {
-				r, err := common.GetRune(txt, 1)
+			if p == -1 {
+				break
+			}
+
+			p += nextP
+			if replaceStr != "" {
+				nextP = p + len(replaceStr)
+			} else {
+				nextP = p + len(searchStr)
+			}
+
+			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+
+			if replaceStr == "" {
+				break
+			}
+
+			txt := line[p : p+len(searchStr)]
+			isLetter := false
+			firstUpper := false
+			secondUpper := false
+
+			if replaceCase {
+				r, err := common.GetRune(txt, 0)
 				if err != nil {
-					return "", err
+					return "", lines, err
 				}
-				secondUpper = unicode.IsUpper(r)
-			}
+				firstUpper = unicode.IsUpper(r)
+				isLetter = unicode.IsLetter(r)
 
-			if isLetter {
-				if firstUpper {
-					if secondUpper {
-						replaceStr = strings.ToUpper(replaceStr)
-					} else {
-						replaceStr = common.Capitalize(replaceStr)
+				if len(txt) > 1 {
+					r, err := common.GetRune(txt, 1)
+					if err != nil {
+						return "", lines, err
 					}
-				} else {
-					replaceStr = strings.ToLower(replaceStr)
+					secondUpper = unicode.IsUpper(r)
+				}
+
+				if isLetter {
+					if firstUpper {
+						if secondUpper {
+							replaceStr = strings.ToUpper(replaceStr)
+						} else {
+							replaceStr = common.Capitalize(replaceStr)
+						}
+					} else {
+						replaceStr = strings.ToLower(replaceStr)
+					}
 				}
 			}
+
+			if replaceUpper {
+				replaceStr = strings.ToUpper(replaceStr)
+			}
+
+			if replaceLower {
+				replaceStr = strings.ToLower(replaceStr)
+			}
+
+			line = line[:p] + replaceStr + line[p+len(searchStr):]
 		}
 
-		if upper {
-			replaceStr = strings.ToUpper(replaceStr)
-		}
+		output = output + line
 
-		if lower {
-			replaceStr = strings.ToLower(replaceStr)
+		if oldLine != line  {
+			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
 		}
-
-		_str = _str[:p] + replaceStr + _str[p+len(searchStr):]
-		str = str[:p] + replaceStr + str[p+len(searchStr):]
 	}
 
-	return str, nil
+	return output, lines, nil
 }
 
 func processStream(input io.Reader, output io.Writer) error {
@@ -120,7 +154,7 @@ func processStream(input io.Reader, output io.Writer) error {
 	}
 
 	str := string(b.Bytes())
-	str, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
+	str, _, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
 	if err != nil {
 		return err
 	}
@@ -139,22 +173,28 @@ func processFile(filename string) error {
 		return err
 	}
 
-	str := string(b)
-	str, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
+	input := string(b)
+
+	output, lines, err := searchAndReplace(input, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
 	if err != nil {
 		return err
 	}
 
-	if str != string(b) {
+	if len(lines) > 0 {
 		fmt.Printf("%s\n", filename)
+		for _, l := range lines {
+			fmt.Printf("%s\n", l)
+		}
+	}
 
+	if !*simulate && output != input {
 		if *replaceStr != "" {
 			err = common.FileBackup(filename, 1)
 			if err != nil {
 				return err
 			}
 
-			err = ioutil.WriteFile(filename, []byte(str), os.ModePerm)
+			err = ioutil.WriteFile(filename, []byte(output), os.ModePerm)
 			if err != nil {
 				return err
 			}
@@ -169,25 +209,33 @@ func walkfunc(path string, info os.FileInfo, err error) error {
 		return err
 	}
 
-	if common.IsFile(path) {
-		var b bool
+	b, err := common.IsFile(path)
+	if err != nil {
+		return err
+	}
 
-		b, err = common.EqualWildcards(filepath.Base(path), *filemask)
-		if err != nil {
-			return err
+	if b {
+		b = *filemask == ""
+
+		if !b {
+			b, err = common.EqualWildcards(filepath.Base(path), *filemask)
+			if err != nil {
+				return err
+			}
 		}
 
 		if !b {
 			return nil
 		}
-		return processFile(path)
-	} else {
-		if *recursive || path == rootPath {
-			return nil
-		}
 
-		return filepath.SkipDir
+		return processFile(path)
 	}
+
+	if *recursive || path == rootPath {
+		return nil
+	}
+
+	return filepath.SkipDir
 }
 
 func walk(path string) error {
@@ -233,7 +281,25 @@ func run() error {
 		return nil
 	}
 
-	b, err := common.FileExists(*filemask)
+	b, err := common.IsDirectory(*filemask)
+	if err != nil {
+		return err
+	}
+
+	if b {
+		rootPath = *filemask
+
+		*filemask = ""
+
+		err = walk(rootPath)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	b, err = common.IsFile(*filemask)
 	if err != nil {
 		return err
 	}
@@ -248,6 +314,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.0", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.1", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
