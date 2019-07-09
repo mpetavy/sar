@@ -33,10 +33,10 @@ var (
 
 func init() {
 	searchStr = flag.String("s", "", "search text")
-	replaceStr = flag.String("r", "", "replace text")
+	replaceStr = flag.String("t", "", "replace text")
 	filemask = flag.String("f", "", "input file or STDIN")
 	ignoreCase = flag.Bool("i", false, "ignore case")
-	recursive = flag.Bool("R", false, "recursive directory search")
+	recursive = flag.Bool("r", false, "recursive directory search")
 	replaceUpper = flag.Bool("ru", false, "replace to replaceUpper")
 	replaceLower = flag.Bool("rl", false, "replace to replaceLower")
 	replaceCase = flag.Bool("rc", false, "replace case sensitive like found text")
