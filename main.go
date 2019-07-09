@@ -257,58 +257,16 @@ func run() error {
 		return nil
 	}
 
-	var err error
-
 	*filemask = common.CleanPath(*filemask)
 
-	if common.ContainsWildcard(*filemask) {
+	rootPath = "."
+
+	if strings.ContainsAny(*filemask, string(filepath.Separator)) {
 		rootPath = filepath.Dir(*filemask)
-
-		if rootPath == "." {
-			rootPath, err = os.Getwd()
-			if err != nil {
-				return err
-			}
-		}
-
 		*filemask = filepath.Base(*filemask)
-
-		err = walk(rootPath)
-		if err != nil {
-			return err
-		}
-
-		return nil
 	}
 
-	b, err := common.IsDirectory(*filemask)
-	if err != nil {
-		return err
-	}
-
-	if b {
-		rootPath = *filemask
-
-		*filemask = ""
-
-		err = walk(rootPath)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	b, err = common.IsFile(*filemask)
-	if err != nil {
-		return err
-	}
-
-	if b {
-		return processFile(*filemask)
-	}
-
-	return fmt.Errorf("cannot process: %s", *filemask)
+	return walk(rootPath)
 }
 
 func main() {
