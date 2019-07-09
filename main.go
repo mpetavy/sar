@@ -188,7 +188,7 @@ func processFile(filename string) error {
 	}
 
 	if !*simulate && output != input {
-		if *replaceStr != "" {
+		if *replaceStr != "" && *backup {
 			err = common.FileBackup(filename, 1)
 			if err != nil {
 				return err
@@ -204,7 +204,7 @@ func processFile(filename string) error {
 	return err
 }
 
-func walkfunc(path string, info os.FileInfo, err error) error {
+func walkfunc(path string, _ os.FileInfo, err error) error {
 	if err != nil {
 		return err
 	}
@@ -272,6 +272,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.2", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.3", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
