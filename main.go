@@ -272,6 +272,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.3", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.4", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
