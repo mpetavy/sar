@@ -37,9 +37,9 @@ func init() {
 	filemask = flag.String("f", "", "input file or STDIN")
 	ignoreCase = flag.Bool("i", false, "ignore case")
 	recursive = flag.Bool("r", false, "recursive directory search")
-	replaceUpper = flag.Bool("ru", false, "replace to replaceUpper")
-	replaceLower = flag.Bool("rl", false, "replace to replaceLower")
-	replaceCase = flag.Bool("rc", false, "replace case sensitive like found text")
+	replaceUpper = flag.Bool("tu", false, "replace to replaceUpper")
+	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
+	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
 	backup = flag.Bool("b", true, "create backup files")
 	simulate = flag.Bool("S", false, "simulate replace")
 }
