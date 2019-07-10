@@ -63,6 +63,8 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 		c++
 
+		fmt.Printf("%d\n",c)
+
 		nextP := 0
 		p := 0
 
@@ -228,6 +230,10 @@ func walkfunc(path string, _ os.FileInfo, err error) error {
 			return nil
 		}
 
+		if path == ".git\\objects\\pack\\pack-e5af219efb9bd6814766d31f96cfb51452e821dc.pack" {
+			fmt.Println("stop")
+		}
+
 		return processFile(path)
 	}
 
@@ -258,8 +264,27 @@ func run() error {
 	}
 
 	*filemask = common.CleanPath(*filemask)
-
 	rootPath = "."
+
+	b,err := common.FileExists(*filemask)
+	if err != nil {
+		return err
+	}
+
+	if b {
+		b,err := common.IsDirectory(*filemask)
+		if err != nil {
+			return err
+		}
+
+		if b {
+			rootPath = *filemask
+			*filemask = ""
+		} else {
+			rootPath = filepath.Dir(*filemask)
+			*filemask = filepath.Base(*filemask)
+		}
+	}
 
 	if strings.ContainsAny(*filemask, string(filepath.Separator)) {
 		rootPath = filepath.Dir(*filemask)
