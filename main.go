@@ -63,8 +63,6 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 		c++
 
-		fmt.Printf("%d\n",c)
-
 		nextP := 0
 		p := 0
 
@@ -230,10 +228,6 @@ func walkfunc(path string, _ os.FileInfo, err error) error {
 			return nil
 		}
 
-		if path == ".git\\objects\\pack\\pack-e5af219efb9bd6814766d31f96cfb51452e821dc.pack" {
-			fmt.Println("stop")
-		}
-
 		return processFile(path)
 	}
 
@@ -297,6 +291,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.4", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.5", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
