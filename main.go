@@ -258,31 +258,30 @@ func run() error {
 	}
 
 	*filemask = common.CleanPath(*filemask)
-	rootPath = "."
 
-	b,err := common.FileExists(*filemask)
-	if err != nil {
-		return err
-	}
-
-	if b {
-		b,err := common.IsDirectory(*filemask)
+	if common.ContainsWildcard(*filemask) {
+		rootPath = filepath.Dir(*filemask)
+		*filemask = filepath.Base(*filemask)
+	} else {
+		b, err := common.FileExists(*filemask)
 		if err != nil {
 			return err
 		}
 
 		if b {
-			rootPath = *filemask
-			*filemask = ""
-		} else {
-			rootPath = filepath.Dir(*filemask)
-			*filemask = filepath.Base(*filemask)
-		}
-	}
+			b, err := common.IsDirectory(*filemask)
+			if err != nil {
+				return err
+			}
 
-	if strings.ContainsAny(*filemask, string(filepath.Separator)) {
-		rootPath = filepath.Dir(*filemask)
-		*filemask = filepath.Base(*filemask)
+			if b {
+				rootPath = *filemask
+				*filemask = ""
+			} else {
+				rootPath = filepath.Dir(*filemask)
+				*filemask = filepath.Base(*filemask)
+			}
+		}
 	}
 
 	return walk(rootPath)
@@ -291,6 +290,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.5", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.6", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
