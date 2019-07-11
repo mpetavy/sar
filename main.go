@@ -17,18 +17,18 @@ import (
 )
 
 var (
-	searchStr    *string
-	replaceStr   *string
-	filemask     *string
-	ignoreCase   *bool
-	replaceCase  *bool
-	recursive    *bool
-	replaceUpper *bool
-	replaceLower *bool
-	backup       *bool
-	simulate     *bool
-
-	rootPath string
+	searchStr         *string
+	replaceStr        *string
+	filemask          *string
+	ignoreCase        *bool
+	replaceCase       *bool
+	recursive         *bool
+	replaceUpper      *bool
+	replaceLower      *bool
+	backup            *bool
+	simulate          *bool
+	onlyListFilenames *bool
+	rootPath          string
 )
 
 func init() {
@@ -41,7 +41,8 @@ func init() {
 	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
 	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
 	backup = flag.Bool("b", true, "create backup files")
-	simulate = flag.Bool("S", false, "simulate replace")
+	simulate = flag.Bool("d", false, "dry run")
+	onlyListFilenames = flag.Bool("l", false, "only list files")
 }
 
 func prepare() error {
@@ -182,8 +183,10 @@ func processFile(filename string) error {
 
 	if len(lines) > 0 {
 		fmt.Printf("%s\n", filename)
-		for _, l := range lines {
-			fmt.Printf("%s", l)
+		if !*onlyListFilenames {
+			for _, l := range lines {
+				fmt.Printf("%s", l)
+			}
 		}
 	}
 
