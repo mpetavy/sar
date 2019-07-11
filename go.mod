@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/gabriel-vasile/mimetype v0.3.15 // indirect
 	github.com/go-ini/ini v1.44.0 // indirect
-	github.com/mpetavy/common v1.1.5
+	github.com/mpetavy/common v1.1.6
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9 // indirect
@@ -14,3 +14,5 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20190710184609-286818132824 // indirect
 )
+
+replace github.com/mpetavy/common => ../common
