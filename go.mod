@@ -10,4 +10,4 @@ require (
 	golang.org/x/sys v0.0.0-20190710143415-6ec70d6a5542 // indirect
 )
 
-// replace github.com/mpetavy/common => ../common
+replace github.com/mpetavy/common => ../common
