@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 	"unicode"
@@ -207,49 +206,6 @@ func processFile(filename string) error {
 	return err
 }
 
-func walkfunc(path string, _ os.FileInfo, err error) error {
-	if err != nil {
-		return err
-	}
-
-	b, err := common.IsFile(path)
-	if err != nil {
-		return err
-	}
-
-	if b {
-		b = *filemask == ""
-
-		if !b {
-			b, err = common.EqualWildcards(filepath.Base(path), *filemask)
-			if err != nil {
-				return err
-			}
-		}
-
-		if !b {
-			return nil
-		}
-
-		return processFile(path)
-	}
-
-	if *recursive || path == rootPath {
-		return nil
-	}
-
-	return filepath.SkipDir
-}
-
-func walk(path string) error {
-	err := filepath.Walk(path, walkfunc)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func run() error {
 	if *filemask == "" {
 		err := processStream(os.Stdin, os.Stdout)
@@ -260,37 +216,7 @@ func run() error {
 		return nil
 	}
 
-	*filemask = common.CleanPath(*filemask)
-
-	if common.ContainsWildcard(*filemask) {
-		rootPath = filepath.Dir(*filemask)
-		*filemask = filepath.Base(*filemask)
-	} else {
-		b, err := common.FileExists(*filemask)
-		if err != nil {
-			return err
-		}
-
-		if b {
-			b, err := common.IsDirectory(*filemask)
-			if err != nil {
-				return err
-			}
-
-			if b {
-				rootPath = *filemask
-				*filemask = ""
-			} else {
-				rootPath = filepath.Dir(*filemask)
-				*filemask = filepath.Base(*filemask)
-			}
-		} else {
-			rootPath = filepath.Dir(*filemask)
-			*filemask = filepath.Base(*filemask)
-		}
-	}
-
-	return walk(rootPath)
+	return common.WalkFilepath(*filemask, *recursive, processFile)
 }
 
 func main() {
