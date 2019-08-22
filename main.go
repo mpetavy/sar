@@ -44,12 +44,6 @@ func init() {
 	onlyListFilenames = flag.Bool("l", false, "only list files")
 }
 
-func prepare() error {
-	common.NoBanner = *filemask == ""
-
-	return nil
-}
-
 func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool) (string, []string, error) {
 	lines := []string{}
 	output := ""
@@ -222,6 +216,6 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.8", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, prepare, nil, nil, run, time.Duration(0)}, []string{"s"})
+	common.New(&common.App{"sar", "1.0.8", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, nil, nil, run, time.Duration(0)}, []string{"s"})
 	common.Run()
 }
