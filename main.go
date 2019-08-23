@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/mpetavy/common"
@@ -31,6 +30,8 @@ var (
 )
 
 func init() {
+	common.Init("sar", "1.0.8", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, nil, nil, run, 0)
+
 	searchStr = flag.String("s", "", "search text")
 	replaceStr = flag.String("t", "", "replace text")
 	filemask = flag.String("f", "", "input file or STDIN")
@@ -216,6 +217,5 @@ func run() error {
 func main() {
 	defer common.Cleanup()
 
-	common.New(&common.App{"sar", "1.0.8", "2018", "Simple search and replace", "mpetavy", common.APACHE, "https://github.com/mpetavy/sar", false, nil, nil, run, time.Duration(0)}, []string{"s"})
-	common.Run()
+	common.Run([]string{"s"})
 }
