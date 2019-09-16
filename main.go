@@ -26,7 +26,6 @@ var (
 	backup            *bool
 	simulate          *bool
 	onlyListFilenames *bool
-	rootPath          string
 )
 
 func init() {
@@ -186,7 +185,7 @@ func processFile(filename string) error {
 
 	if !*simulate && output != input {
 		if *replaceStr != "" && *backup {
-			err = common.FileBackup(filename, 1)
+			err = common.FileBackup(filename)
 			if err != nil {
 				return err
 			}
