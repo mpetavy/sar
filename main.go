@@ -190,7 +190,7 @@ func processFile(filename string) error {
 				return err
 			}
 
-			err = ioutil.WriteFile(filename, []byte(output), common.FileFileMode)
+			err = ioutil.WriteFile(filename, []byte(output), common.DefaultFileMode)
 			if err != nil {
 				return err
 			}
