@@ -90,7 +90,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 			secondUpper := false
 
 			if replaceCase {
-				r, err := common.GetRune(txt, 0)
+				r, err := common.Rune(txt, 0)
 				if err != nil {
 					return "", lines, err
 				}
@@ -98,7 +98,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 				isLetter = unicode.IsLetter(r)
 
 				if len(txt) > 1 {
-					r, err := common.GetRune(txt, 1)
+					r, err := common.Rune(txt, 1)
 					if err != nil {
 						return "", lines, err
 					}
