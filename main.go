@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -19,12 +20,13 @@ var (
 	replaceStr        *string
 	filemask          *string
 	ignoreCase        *bool
+	negative          *bool
 	replaceCase       *bool
 	recursive         *bool
 	replaceUpper      *bool
 	replaceLower      *bool
 	backup            *bool
-	simulate          *bool
+	dryrun            *bool
 	onlyListFilenames *bool
 )
 
@@ -34,13 +36,14 @@ func init() {
 	searchStr = flag.String("s", "", "search text")
 	replaceStr = flag.String("t", "", "replace text")
 	filemask = flag.String("f", "", "input file or STDIN")
+	negative = flag.Bool("n", false, "negative search")
 	ignoreCase = flag.Bool("i", false, "ignore case")
 	recursive = flag.Bool("r", false, "recursive directory search")
 	replaceUpper = flag.Bool("tu", false, "replace to replaceUpper")
 	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
 	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
 	backup = flag.Bool("b", true, "create backup files")
-	simulate = flag.Bool("d", false, "dry run")
+	dryrun = flag.Bool("d", false, "dry run")
 	onlyListFilenames = flag.Bool("l", false, "only list files")
 }
 
@@ -49,6 +52,8 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 	output := ""
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	scanner.Split(common.ScanLinesWithLF)
+
+	regex := regexp.MustCompile(searchStr[2:])
 
 	c := 0
 	for scanner.Scan() {
@@ -59,12 +64,21 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 		nextP := 0
 		p := 0
+		l := len(replaceStr)
 
 		for {
+			temp := line[nextP:]
+
 			if ignoreCase {
-				p = strings.Index(strings.ToUpper(line[nextP:]), strings.ToUpper(searchStr))
+				temp = strings.ToUpper(temp)
+			}
+
+			loc := regex.FindIndex([]byte(temp))
+			if len(loc) > 0 {
+				p = loc[0]
+				l = loc[1]
 			} else {
-				p = strings.Index(line[nextP:], searchStr)
+				p = -1
 			}
 
 			if p == -1 {
@@ -75,7 +89,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 			if replaceStr != "" {
 				nextP = p + len(replaceStr)
 			} else {
-				nextP = p + len(searchStr)
+				nextP = p + l
 			}
 
 			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
@@ -174,8 +188,11 @@ func processFile(filename string) error {
 		return err
 	}
 
-	if len(lines) > 0 {
+	if len(lines) > 0 != *negative {
 		fmt.Printf("%s\n", filename)
+	}
+
+	if len(lines) > 0 && !*negative {
 		if !*onlyListFilenames {
 			for _, l := range lines {
 				fmt.Printf("%s", l)
@@ -183,7 +200,7 @@ func processFile(filename string) error {
 		}
 	}
 
-	if !*simulate && output != input {
+	if !*dryrun && output != input {
 		if *replaceStr != "" && *backup {
 			err = common.FileBackup(filename)
 			if err != nil {
