@@ -53,7 +53,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	scanner.Split(common.ScanLinesWithLF)
 
-	regex := regexp.MustCompile(searchStr[2:])
+	regex := regexp.MustCompile(searchStr)
 
 	c := 0
 	for scanner.Scan() {
