@@ -27,6 +27,7 @@ var (
 	replaceLower      *bool
 	backup            *bool
 	dryrun            *bool
+	convertCase       *bool
 	onlyListFilenames *bool
 )
 
@@ -44,10 +45,11 @@ func init() {
 	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
 	backup = flag.Bool("b", true, "create backup files")
 	dryrun = flag.Bool("d", false, "dry run")
+	convertCase = flag.Bool("cc", false, "convert case")
 	onlyListFilenames = flag.Bool("l", false, "only list files")
 }
 
-func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool) (string, []string, error) {
+func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool, convertCase bool) (string, []string, error) {
 	lines := []string{}
 	output := ""
 	scanner := bufio.NewScanner(strings.NewReader(input))
@@ -143,6 +145,9 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 			line = line[:p] + replaceStr + line[p+len(searchStr):]
 		}
 
+		if convertCase {
+		}
+
 		output = output + line
 
 		if oldLine != line {
@@ -162,7 +167,7 @@ func processStream(input io.Reader, output io.Writer) error {
 	}
 
 	str := string(b.Bytes())
-	str, _, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
+	str, _, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower, *convertCase)
 	if err != nil {
 		return err
 	}
@@ -184,7 +189,7 @@ func processFile(filename string) error {
 
 	input := string(b)
 
-	output, lines, err := searchAndReplace(input, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
+	output, lines, err := searchAndReplace(input, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower, *convertCase)
 	if err != nil {
 		return err
 	}
