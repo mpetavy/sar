@@ -19,15 +19,14 @@ var (
 	searchStr         *string
 	replaceStr        *string
 	filemask          *string
+	ignoreError       *bool
 	ignoreCase        *bool
 	negative          *bool
 	replaceCase       *bool
 	recursive         *bool
 	replaceUpper      *bool
 	replaceLower      *bool
-	backup            *bool
 	dryrun            *bool
-	convertCase       *bool
 	onlyListFilenames *bool
 )
 
@@ -36,20 +35,19 @@ func init() {
 
 	searchStr = flag.String("s", "", "search text")
 	replaceStr = flag.String("t", "", "replace text")
-	filemask = flag.String("f", "", "input file or STDIN")
+	filemask = flag.String("f", "*", "input file or STDIN")
 	negative = flag.Bool("n", false, "negative search")
+	ignoreError = flag.Bool("e", true, "ignore error")
 	ignoreCase = flag.Bool("i", false, "ignore case")
 	recursive = flag.Bool("r", false, "recursive directory search")
 	replaceUpper = flag.Bool("tu", false, "replace to replaceUpper")
 	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
 	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
-	backup = flag.Bool("b", true, "create backup files")
 	dryrun = flag.Bool("d", false, "dry run")
-	convertCase = flag.Bool("cc", false, "convert case")
 	onlyListFilenames = flag.Bool("l", false, "only list files")
 }
 
-func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool, convertCase bool) (string, []string, error) {
+func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool) (string, []string, error) {
 	lines := []string{}
 	output := ""
 	scanner := bufio.NewScanner(strings.NewReader(input))
@@ -145,9 +143,6 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 			line = line[:p] + replaceStr + line[p+len(searchStr):]
 		}
 
-		if convertCase {
-		}
-
 		output = output + line
 
 		if oldLine != line {
@@ -167,7 +162,7 @@ func processStream(input io.Reader, output io.Writer) error {
 	}
 
 	str := string(b.Bytes())
-	str, _, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower, *convertCase)
+	str, _, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
 	if err != nil {
 		return err
 	}
@@ -184,12 +179,18 @@ func processFile(filename string) error {
 	common.DebugFunc(filename)
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
+		if *ignoreError {
+			common.Warn("cannot access: %s", filename)
+
+			return nil
+		}
+
 		return err
 	}
 
 	input := string(b)
 
-	output, lines, err := searchAndReplace(input, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower, *convertCase)
+	output, lines, err := searchAndReplace(input, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
 	if err != nil {
 		return err
 	}
@@ -207,7 +208,7 @@ func processFile(filename string) error {
 	}
 
 	if !*dryrun && output != input {
-		if *replaceStr != "" && *backup {
+		if *replaceStr != "" && *common.FlagCountBackups > 0 {
 			err = common.FileBackup(filename)
 			if err != nil {
 				return err
@@ -233,7 +234,7 @@ func run() error {
 		return nil
 	}
 
-	return common.WalkFilepath(*filemask, *recursive, processFile)
+	return common.WalkFilepath(*filemask, *recursive, *ignoreError, processFile)
 }
 
 func main() {
