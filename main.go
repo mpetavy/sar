@@ -207,17 +207,15 @@ func processFile(filename string) error {
 		}
 	}
 
-	if !*dryrun && output != input {
-		if *replaceStr != "" && *common.FlagCountBackups > 0 {
-			err = common.FileBackup(filename)
-			if err != nil {
-				return err
-			}
+	if !*dryrun && output != input && *replaceStr != "" {
+		err = common.FileBackup(filename)
+		if err != nil {
+			return err
+		}
 
-			err = ioutil.WriteFile(filename, []byte(output), common.DefaultFileMode)
-			if err != nil {
-				return err
-			}
+		err = ioutil.WriteFile(filename, []byte(output), common.DefaultFileMode)
+		if err != nil {
+			return err
 		}
 	}
 
