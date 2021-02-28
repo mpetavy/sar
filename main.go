@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -177,7 +176,7 @@ func processStream(input io.Reader, output io.Writer) error {
 
 func processFile(filename string) error {
 	common.DebugFunc(filename)
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		if *ignoreError {
 			common.Warn("cannot access: %s", filename)
@@ -213,7 +212,7 @@ func processFile(filename string) error {
 			return err
 		}
 
-		err = ioutil.WriteFile(filename, []byte(output), common.DefaultFileMode)
+		err = os.WriteFile(filename, []byte(output), common.DefaultFileMode)
 		if err != nil {
 			return err
 		}
