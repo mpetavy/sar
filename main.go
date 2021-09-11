@@ -52,7 +52,12 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	scanner.Split(common.ScanLinesWithLF)
 
-	regex := regexp.MustCompile(searchStr)
+	regexValue := searchStr
+	if ignoreCase {
+		regexValue = fmt.Sprintf("(?i)%s", searchStr)
+	}
+
+	regex := regexp.MustCompile(regexValue)
 
 	c := 0
 	for scanner.Scan() {
@@ -67,10 +72,6 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 		for {
 			temp := line[nextP:]
-
-			if ignoreCase {
-				temp = strings.ToUpper(temp)
-			}
 
 			loc := regex.FindIndex([]byte(temp))
 			if len(loc) > 0 {
