@@ -64,33 +64,14 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 		line := scanner.Text()
 		oldLine := line
 
-		c++
+		diffLen := len(searchStr) - len(replaceStr)
 
-		nextP := 0
-		p := 0
-		l := len(replaceStr)
+		indices := regex.FindAllIndex([]byte(line), -1)
 
-		for {
-			temp := line[nextP:]
+		for i := 0; i < len(indices); i++ {
+			c++
 
-			loc := regex.FindIndex([]byte(temp))
-			if len(loc) > 0 {
-				p = loc[0]
-				l = loc[1]
-			} else {
-				p = -1
-			}
-
-			if p == -1 {
-				break
-			}
-
-			p += nextP
-			if replaceStr != "" {
-				nextP = p + len(replaceStr)
-			} else {
-				nextP = p + l
-			}
+			p := indices[i][0] + (i * diffLen)
 
 			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
 

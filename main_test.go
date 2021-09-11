@@ -1,38 +1,93 @@
 package main
 
 import (
-	"strings"
+	"fmt"
 	"testing"
 )
 
 func TestDefault(t *testing.T) {
-	r, _, err := searchAndReplace("abc", "A", "A", false, false, false, false)
-	if err != nil || strings.TrimSpace(r) != "abc" {
-		t.Fail()
+	var tests = []struct {
+		input        string
+		searchStr    string
+		replaceStr   string
+		ignoreCase   bool
+		replaceCase  bool
+		replaceUpper bool
+		replaceLower bool
+		result       string
+	}{
+		{
+			input:        "abc",
+			searchStr:    "A",
+			replaceStr:   "X",
+			ignoreCase:   false,
+			replaceCase:  false,
+			replaceUpper: false,
+			replaceLower: false,
+			result:       "abc",
+		},
+		{
+			input:        "aba",
+			searchStr:    "a",
+			replaceStr:   "X",
+			ignoreCase:   false,
+			replaceCase:  false,
+			replaceUpper: false,
+			replaceLower: false,
+			result:       "XbX",
+		},
+		{
+			input:        "abca",
+			searchStr:    "A",
+			replaceStr:   "X",
+			ignoreCase:   true,
+			replaceCase:  false,
+			replaceUpper: false,
+			replaceLower: false,
+			result:       "XbcX",
+		},
+		{
+			input:        "abcAbcAB",
+			searchStr:    "ab",
+			replaceStr:   "xx",
+			ignoreCase:   true,
+			replaceCase:  true,
+			replaceUpper: false,
+			replaceLower: false,
+			result:       "xxcXxcXX",
+		},
+		{
+			input:        "abcAbcAB",
+			searchStr:    "ab",
+			replaceStr:   "xx",
+			ignoreCase:   true,
+			replaceCase:  false,
+			replaceUpper: true,
+			replaceLower: false,
+			result:       "XXcXXcXX",
+		},
+		{
+			input:        "abcAbcAB",
+			searchStr:    "ab",
+			replaceStr:   "xx",
+			ignoreCase:   true,
+			replaceCase:  false,
+			replaceUpper: false,
+			replaceLower: true,
+			result:       "xxcxxcxx",
+		},
 	}
 
-	r, _, err = searchAndReplace("aba", "a", "X", false, false, false, false)
-	if err != nil || strings.TrimSpace(r) != "XbX" {
-		t.Fail()
-	}
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("test %d: %+v", i, test), func(t *testing.T) {
+			r, _, err := searchAndReplace(test.input, test.searchStr, test.replaceStr, test.ignoreCase, test.replaceCase, test.replaceUpper, test.replaceLower)
+			if err != nil {
+				t.Error(err)
+			}
 
-	r, _, err = searchAndReplace("abca", "A", "X", true, false, false, false)
-	if err != nil || strings.TrimSpace(r) != "XbcX" {
-		t.Fail()
-	}
-
-	r, _, err = searchAndReplace("abcAbcAB", "ab", "xx", true, true, false, false)
-	if err != nil || strings.TrimSpace(r) != "xxcXxcXX" {
-		t.Fail()
-	}
-
-	r, _, err = searchAndReplace("abcAbcAB", "ab", "xx", true, false, true, false)
-	if err != nil || strings.TrimSpace(r) != "XXcXXcXX" {
-		t.Fail()
-	}
-
-	r, _, err = searchAndReplace("abcAbcAB", "ab", "xx", true, false, false, true)
-	if err != nil || strings.TrimSpace(r) != "xxcxxcxx" {
-		t.Fail()
+			if r != test.result {
+				t.Errorf("got %q, want %q", r, test.result)
+			}
+		})
 	}
 }
