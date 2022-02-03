@@ -15,18 +15,19 @@ import (
 )
 
 var (
-	searchStr         *string
-	replaceStr        *string
-	filemask          *string
-	ignoreError       *bool
-	ignoreCase        *bool
-	negative          *bool
-	replaceCase       *bool
-	recursive         *bool
-	replaceUpper      *bool
-	replaceLower      *bool
-	dryrun            *bool
-	onlyListFilenames *bool
+	searchStr             *string
+	replaceStr            *string
+	filemask              *string
+	ignoreError           *bool
+	ignoreCase            *bool
+	negative              *bool
+	replaceCase           *bool
+	recursive             *bool
+	replaceUpper          *bool
+	replaceLower          *bool
+	dryrun                *bool
+	onlyListFilenames     *bool
+	skipHiddenDirectories *bool
 )
 
 func init() {
@@ -44,6 +45,8 @@ func init() {
 	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
 	dryrun = flag.Bool("d", false, "dry run")
 	onlyListFilenames = flag.Bool("l", false, "only list files")
+	skipHiddenDirectories = flag.Bool("sh", true, "skip hidden directories")
+
 }
 
 func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool) (string, []string, error) {
@@ -213,7 +216,10 @@ func run() error {
 		return nil
 	}
 
-	return common.WalkFilepath(*filemask, *recursive, *ignoreError, processFile)
+	fw := common.NewFilewalker(*filemask, *recursive, *ignoreError, processFile)
+	fw.IgnoreHiddenDirectories = *skipHiddenDirectories
+
+	return fw.Run()
 }
 
 func main() {
