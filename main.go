@@ -188,7 +188,7 @@ func processFile(filename string) error {
 		return err
 	}
 
-	if len(lines) > 0 != *negative {
+	if !*plain && len(lines) > 0 != *negative {
 		fmt.Printf("%s\n", filename)
 	}
 
