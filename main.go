@@ -27,6 +27,7 @@ var (
 	replaceLower          *bool
 	dryrun                *bool
 	onlyListFilenames     *bool
+	plain                 *bool
 	skipHiddenDirectories *bool
 )
 
@@ -46,7 +47,7 @@ func init() {
 	dryrun = flag.Bool("d", false, "dry run")
 	onlyListFilenames = flag.Bool("l", false, "only list files")
 	skipHiddenDirectories = flag.Bool("sh", true, "skip hidden directories")
-
+	plain = flag.Bool("p", false, "plain output")
 }
 
 func searchAndReplace(input string, searchStr string, replaceStr string, ignoreCase bool, replaceCase bool, replaceUpper bool, replaceLower bool) (string, []string, error) {
@@ -76,7 +77,11 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 			p := indices[i][0] + (i * diffLen)
 
-			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+			if *plain {
+				lines = append(lines, line)
+			} else {
+				lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+			}
 
 			if replaceStr == "" {
 				break
@@ -130,7 +135,11 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 		output = output + line
 
 		if oldLine != line {
-			lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+			if *plain {
+				lines = append(lines, line)
+			} else {
+				lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+			}
 		}
 	}
 
