@@ -173,7 +173,7 @@ func processFile(filename string) error {
 	b, err := os.ReadFile(filename)
 	if err != nil {
 		if *ignoreError {
-			common.Warn("cannot access: %s", filename)
+			common.Warn(fmt.Errorf("cannot access: %s", filename))
 
 			return nil
 		}
