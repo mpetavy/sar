@@ -72,13 +72,13 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 		indices := regex.FindAllIndex([]byte(line), -1)
 
-		for i := 0; i < len(indices); i++ {
+		for i, index := range indices {
 			c++
 
 			p := indices[i][0] + (i * diffLen)
 
 			if *plain {
-				lines = append(lines, line)
+				lines = append(lines, line[index[0]:index[1]]+"\n")
 			} else {
 				lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
 			}
