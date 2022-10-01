@@ -168,7 +168,7 @@ func processStream(input io.Reader, output io.Writer) error {
 	return nil
 }
 
-func processFile(filename string) error {
+func processFile(filename string, f os.FileInfo) error {
 	common.DebugFunc(filename)
 	b, err := os.ReadFile(filename)
 	if err != nil {
