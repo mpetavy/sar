@@ -68,14 +68,15 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 		line := scanner.Text()
 		oldLine := line
 
-		diffLen := len(searchStr) - len(replaceStr)
-
+		diffAdd := 0
 		indices := regex.FindAllIndex([]byte(line), -1)
 
 		for i, index := range indices {
 			c++
 
-			p := indices[i][0] + (i * diffLen)
+			foundLen := index[1] - index[0]
+
+			p := indices[i][0] + diffAdd
 
 			if *plain {
 				lines = append(lines, line[index[0]:index[1]]+"\n")
@@ -87,7 +88,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 				break
 			}
 
-			txt := line[p : p+len(searchStr)]
+			txt := line[p : p+foundLen]
 			isLetter := false
 			firstUpper := false
 			secondUpper := false
@@ -129,7 +130,9 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 				replaceStr = strings.ToLower(replaceStr)
 			}
 
-			line = line[:p] + replaceStr + line[p+len(searchStr):]
+			line = line[:p] + replaceStr + line[p+foundLen:]
+
+			diffAdd += foundLen
 		}
 
 		output = output + line
