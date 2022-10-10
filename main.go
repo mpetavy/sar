@@ -15,20 +15,20 @@ import (
 )
 
 var (
-	searchStr             *string
-	replaceStr            *string
-	filemask              *string
-	ignoreError           *bool
-	ignoreCase            *bool
-	negative              *bool
-	replaceCase           *bool
-	recursive             *bool
-	replaceUpper          *bool
-	replaceLower          *bool
-	dryrun                *bool
-	onlyListFilenames     *bool
-	plain                 *bool
-	skipHiddenDirectories *bool
+	searchStr         *string
+	replaceStr        *string
+	filemask          *string
+	ignoreError       *bool
+	ignoreCase        *bool
+	ignoreHidden      *bool
+	negative          *bool
+	replaceCase       *bool
+	recursive         *bool
+	replaceUpper      *bool
+	replaceLower      *bool
+	dryrun            *bool
+	onlyListFilenames *bool
+	plain             *bool
 )
 
 func init() {
@@ -40,13 +40,13 @@ func init() {
 	negative = flag.Bool("n", false, "negative search")
 	ignoreError = flag.Bool("e", true, "ignore error")
 	ignoreCase = flag.Bool("i", false, "ignore case")
+	ignoreHidden = flag.Bool("x", true, "ignore hidden directories")
 	recursive = flag.Bool("r", false, "recursive directory search")
 	replaceUpper = flag.Bool("tu", false, "replace to replaceUpper")
 	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
 	replaceCase = flag.Bool("tc", false, "replace case sensitive like found text")
 	dryrun = flag.Bool("d", false, "dry run")
 	onlyListFilenames = flag.Bool("l", false, "only list files")
-	skipHiddenDirectories = flag.Bool("sh", true, "skip hidden directories")
 	plain = flag.Bool("p", false, "plain output")
 }
 
@@ -169,15 +169,13 @@ func processStream(input io.Reader, output io.Writer) error {
 }
 
 func processFile(filename string, f os.FileInfo) error {
+	if f.IsDir() {
+		return nil
+	}
+
 	common.DebugFunc(filename)
 	b, err := os.ReadFile(filename)
 	if err != nil {
-		if *ignoreError {
-			common.Warn(fmt.Errorf("cannot access: %s", filename))
-
-			return nil
-		}
-
 		return err
 	}
 
@@ -226,7 +224,7 @@ func run() error {
 	}
 
 	fw := common.NewFilewalker(*filemask, *recursive, *ignoreError, processFile)
-	fw.IgnoreHiddenDirectories = *skipHiddenDirectories
+	fw.IgnoreHiddenDirectories = *ignoreHidden
 
 	return fw.Run()
 }
