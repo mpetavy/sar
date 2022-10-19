@@ -226,8 +226,10 @@ func run() error {
 		return nil
 	}
 
-	fw := common.NewFilewalker(*filemask, *recursive, *ignoreError, processFile)
-	fw.IgnoreHiddenDirectories = *ignoreHidden
+	fw, err := common.NewFilewalker(*filemask, *recursive, *ignoreError, processFile)
+	if err != nil {
+		return err
+	}
 
 	return fw.Run()
 }
