@@ -132,7 +132,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 			line = line[:p] + replaceStr + line[p+foundLen:]
 
-			diffAdd += foundLen
+			diffAdd += len(replaceStr) - foundLen
 		}
 
 		output = output + line
