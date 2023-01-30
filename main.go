@@ -64,7 +64,10 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 	regex := regexp.MustCompile(regexValue)
 
 	c := 0
+	lc := 0
 	for scanner.Scan() {
+		lc++
+
 		line := scanner.Text()
 		oldLine := line
 
@@ -81,7 +84,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 			if *plain {
 				lines = append(lines, line[index[0]:index[1]]+"\n")
 			} else {
-				lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+				lines = append(lines, fmt.Sprintf("line %5d: %s", lc, line))
 			}
 
 			if replaceStr == "" {
@@ -141,7 +144,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 			if *plain {
 				lines = append(lines, line)
 			} else {
-				lines = append(lines, fmt.Sprintf("%5d: %s", c, line))
+				lines = append(lines, fmt.Sprintf("line %5d: %s", lc, line))
 			}
 		}
 	}
