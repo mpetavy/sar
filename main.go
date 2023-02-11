@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"regexp"
 	"strings"
@@ -176,6 +177,10 @@ func processStream(input io.Reader, output io.Writer) error {
 
 func processFile(filename string, f os.FileInfo) error {
 	if f.IsDir() {
+		if *ignoreHidden && strings.HasPrefix(f.Name(), ".") {
+			return fs.SkipDir
+		}
+
 		return nil
 	}
 
@@ -238,7 +243,5 @@ func run() error {
 }
 
 func main() {
-	defer common.Done()
-
 	common.Run([]string{"s"})
 }
