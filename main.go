@@ -99,7 +99,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 			if replaceCase {
 				r, err := common.Rune(txt, 0)
-				if err != nil {
+				if common.Error(err) {
 					return "", lines, err
 				}
 				firstUpper = unicode.IsUpper(r)
@@ -107,7 +107,7 @@ func searchAndReplace(input string, searchStr string, replaceStr string, ignoreC
 
 				if len(txt) > 1 {
 					r, err := common.Rune(txt, 1)
-					if err != nil {
+					if common.Error(err) {
 						return "", lines, err
 					}
 					secondUpper = unicode.IsUpper(r)
@@ -157,18 +157,18 @@ func processStream(input io.Reader, output io.Writer) error {
 	b := bytes.Buffer{}
 
 	_, err := io.Copy(&b, input)
-	if err != nil {
+	if common.Error(err) {
 		return err
 	}
 
 	str := string(b.Bytes())
 	str, _, err = searchAndReplace(str, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
-	if err != nil {
+	if common.Error(err) {
 		return err
 	}
 
 	_, err = output.Write([]byte(str))
-	if err != nil {
+	if common.Error(err) {
 		return err
 	}
 
@@ -186,14 +186,14 @@ func processFile(filename string, f os.FileInfo) error {
 
 	common.DebugFunc(filename)
 	b, err := os.ReadFile(filename)
-	if err != nil {
+	if common.Error(err) {
 		return err
 	}
 
 	input := string(b)
 
 	output, lines, err := searchAndReplace(input, *searchStr, *replaceStr, *ignoreCase, *replaceCase, *replaceUpper, *replaceLower)
-	if err != nil {
+	if common.Error(err) {
 		return err
 	}
 
@@ -211,12 +211,12 @@ func processFile(filename string, f os.FileInfo) error {
 
 	if !*dryrun && output != input && *replaceStr != "" {
 		err = common.FileBackup(filename)
-		if err != nil {
+		if common.Error(err) {
 			return err
 		}
 
 		err = os.WriteFile(filename, []byte(output), common.DefaultFileMode)
-		if err != nil {
+		if common.Error(err) {
 			return err
 		}
 	}
@@ -227,19 +227,19 @@ func processFile(filename string, f os.FileInfo) error {
 func run() error {
 	if *filemask == "" {
 		err := processStream(os.Stdin, os.Stdout)
-		if err != nil {
+		if common.Error(err) {
 			return err
 		}
 
 		return nil
 	}
 
-	fw, err := common.NewFilewalker(*filemask, *recursive, *ignoreError, processFile)
-	if err != nil {
+	err := common.WalkFiles(*filemask, *recursive, *ignoreError, processFile)
+	if common.Error(err) {
 		return err
 	}
 
-	return fw.Run()
+	return nil
 }
 
 func main() {
