@@ -33,7 +33,7 @@ var (
 )
 
 func init() {
-	common.Init("sar", "1.0.8", "", "", "2018", "Simple search and replace", "mpetavy", fmt.Sprintf("https://github.com/mpetavy/%s", common.Title()), common.APACHE, nil, nil, nil, run, 0)
+	common.Init("sar", "", "", "", "2018", "Simple search and replace", "mpetavy", fmt.Sprintf("https://github.com/mpetavy/%s", common.Title()), common.APACHE, nil, nil, nil, run, 0)
 
 	searchStr = flag.String("s", "", "search text")
 	replaceStr = flag.String("t", "", "replace text")
