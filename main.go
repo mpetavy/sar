@@ -41,7 +41,7 @@ func init() {
 	negative = flag.Bool("n", false, "negative search")
 	ignoreError = flag.Bool("e", true, "ignore error")
 	ignoreCase = flag.Bool("i", false, "ignore case")
-	ignoreHidden = flag.Bool("x", true, "ignore hidden directories")
+	ignoreHidden = flag.Bool("x", false, "ignore hidden directories")
 	recursive = flag.Bool("r", false, "recursive directory search")
 	replaceUpper = flag.Bool("tu", false, "replace to replaceUpper")
 	replaceLower = flag.Bool("tl", false, "replace to replaceLower")
