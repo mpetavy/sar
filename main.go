@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"embed"
 	"flag"
 	"fmt"
 	"io"
@@ -32,8 +33,11 @@ var (
 	plain             *bool
 )
 
+//go:embed go.mod
+var resources embed.FS
+
 func init() {
-	common.Init("sar", "", "", "", "2018", "Simple search and replace", "mpetavy", fmt.Sprintf("https://github.com/mpetavy/%s", common.Title()), common.APACHE, nil, nil, nil, run, 0)
+	common.Init("", "", "", "", "Simple search and replace", "", "", "", &resources, nil, nil, run, 0)
 
 	searchStr = flag.String("s", "", "search text")
 	replaceStr = flag.String("t", "", "replace text")
